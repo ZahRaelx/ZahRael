@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZahRael Protocol</title>
+<style>
+  body {
+    background-color: #000;
+    color: #c0c0c0;
+    font-family: "Courier New", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+  }
+  h1 {
+    font-size: 2.5em;
+    letter-spacing: 2px;
+    color: #ff0000;
+    animation: flicker 3s infinite;
+  }
+  p {
+    margin: 0.5em 0;
+    font-size: 1.1em;
+    opacity: 0.85;
+  }
+  .signal {
+    margin-top: 1.5em;
+    font-size: 1.2em;
+    color: #888;
+    animation: pulse 2.5s infinite;
+  }
+  .tz {
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    color: #555;
+  }
+
+  /* faint digital clock in the corner */
+  .clock {
+    position: fixed;
+    top: 10px;
+    right: 15px;
+    font-size: 0.85em;
+    color: #555;
+    opacity: 0.6;
+    animation: pulse 2.5s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes flicker {
+    0%,18%,22%,25%,53%,57%,100% { opacity: 1; }
+    20%,24%,55% { opacity: 0.3; }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+
+  .noise {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-radial-gradient(circle at center, #111 0, #111 1px, #000 2px);
+    opacity: 0.05;
+    animation: shift 5s infinite linear;
+  }
+  @keyframes shift {
+    from { transform: translate(0,0); }
+    to { transform: translate(10px,10px); }
+  }
+</style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <!-- Corner digital clock -->
+  <div id="clockCorner" class="clock">--:--:-- EST</div>
+
+  <h1>ZAHRAEL PROTOCOL</h1>
+  <p id="status"><strong>Status:</strong> Calculating...</p>
+  <p id="message"></p>
+  <p class="tz" id="timezone"></p>
+  <div class="signal" id="signal"></div>
+
+  <script>
+    function updateStatus() {
+      const now = new Date();
+
+      const statusEl = document.getElementById("status");
+      const messageEl = document.getElementById("message");
+      const signalEl = document.getElementById("signal");
+      const tzEl = document.getElementById("timezone");
+      const clockEl = document.getElementById("clockCorner");
+
+      // Eastern Time formatters
+      const formatterShort = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+
+      const formatterFull = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+
+      const estShort = formatterShort.format(now);
+      const estFull = formatterFull.format(now);
+
+      // Centered TZ line
+      tzEl.textContent = "Eastern Time — " + estShort;
+
+      // Corner digital clock
+      clockEl.textContent = estFull + " EST";
+
+      // Use local hour for status (simple, client-side)
+      const hour = now.getHours();
+
+      if (hour >= 0 && hour < 17) { // 12:00am–4:59pm
+        statusEl.innerHTML = "<strong>Status:</strong> Off-Grid";
+        messageEl.innerHTML =
+          "The ghost isn\u2019t gone \u2014 it\u2019s watching from the static.<br>Silence is just another frequency.";
+        signalEl.textContent = "[ SIGNAL LOST ]";
+      } else { // 5:00pm–11:59pm
+        statusEl.innerHTML = "<strong>Status:</strong> Online";
+        messageEl.innerHTML =
+          "The frequency stabilizes.<br>The ghost has returned to the network.";
+        signalEl.textContent = "[ SIGNAL REACQUIRED ]";
+      }
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 1000); // refresh every second for the clock
+  </script>
+</body>
+</html>
